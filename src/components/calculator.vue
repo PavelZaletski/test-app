@@ -2,29 +2,13 @@
   <section class="test">
     <h2>Calculator</h2>
     <div class="wrapper">
-      <div class="error-msg" v-if="hasError">Error occured</div>
-      <input :class="{error : hasError, result: true}"  type="text" v-model="result" disabled><br />
-      <div class="numbers" v-on:click="add">
-        <button v-on:click="reset">C</button>
-        <button>(</button>
-        <button>)</button>
-        <button v-on:click="removeSymbol">&larr;</button>
-        <button>7</button>
-        <button>8</button>
-        <button>9</button>
-        <button> / </button>
-        <button>4</button>
-        <button>5</button>
-        <button>6</button>
-        <button> * </button>
-        <button>1</button>
-        <button>2</button>
-        <button>3</button>
-        <button> - </button>
-        <button>.</button>
-        <button>0</button>
-        <button class="result-btn" v-on:click="calculate">=</button>
-        <button>+</button>
+      <input class="result"  type="text" v-model="result" disabled><br />
+      <div class="numbers">
+        <button data-id="c" v-on:click="reset">C</button>
+        <button data-id="<" v-on:click="removeSymbol">&larr;</button>
+        <button :data-id="item" v-for="item in map.numbers" v-on:click="handleNumberCLick">{{item}}</button>
+        <button :data-id="item" v-for="item in map.operators.values" v-on:click="handleOperatorClick">{{item}}</button>
+        <button data-id="=" class="result-btn" v-on:click="calculate">=</button>
       </div>
     </div>
   </section>
@@ -36,29 +20,48 @@ export default {
   data() {
     return {
       result: '',
-      hasError: false
+      items: ['', ''],
+      currentIndex: 0,
+      currentOperator: null,
+      map: {
+        numbers: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, '.'],
+        operators: {
+          values: ['+', '-', '*', '/'],
+          callbacks: {
+            '+': (a, b) => +a + +b,
+            '-': (a, b) => a - b, 
+            '*': (a, b) => a * b, 
+            '/': (a, b) => a / b, 
+          }
+        }
+      }
     }
   },
   methods: {
-    add: function(e) {
-      this.result += e.target.innerHTML;
+    handleNumberCLick: function(e) {
+      const newValue = this.items[this.currentIndex] + e.target.innerHTML;
+      this.set(newValue);
     },
-    calculate: function(e) {
-      e.stopPropagation();
-      try {
-        this.result = eval(this.result);
-        this.hasError = false;
-      } catch(e) {
-        this.hasError = true;
-      }
+    set(value) {
+      this.result = this.items[this.currentIndex] = value;
+    },
+    calculate: function() {
+      const cb = this.map.operators.callbacks[this.currentOperator];
+      const newValue = cb(...this.items).toString();
+      this.currentIndex = 0;
+      this.items[1] = '';
+      this.set(newValue);
     },
     removeSymbol: function(e) {
-      e.stopPropagation();
-      this.result = this.result.slice(0, -1);
+      const newValue = this.result.slice(0, -1);
+      this.set(newValue);
     },
     reset: function () {
-      e.stopPropagation();
-      this.result = '';
+      this.set('');
+    },
+    handleOperatorClick: function({target}) {
+      this.currentOperator = target.innerHTML;
+      this.currentIndex++;
     }
   }
 }
@@ -85,6 +88,7 @@ export default {
     flex-basis: 25%;
     padding: 20px;
     font-size: 24px;
+    order: 100;
   }
 
   .result {
@@ -103,6 +107,80 @@ export default {
     color: red;
     text-align: center;
     width: 100%;
+  }
+
+  button[data-id="c"] {
+    order: 0;
+    flex-basis: 50%;
+  }
+
+  button[data-id="<"] {
+    order: 1;
+  }
+
+  button[data-id="/"] {
+    order: 2;
+  }
+
+  button[data-id="1"] {
+    order: 3;
+  }
+
+  button[data-id="2"] {
+    order: 4;
+  }
+
+  button[data-id="3"] {
+    order: 5;
+  }
+
+  button[data-id="*"] {
+    order: 6;
+  }
+
+  button[data-id="4"] {
+    order: 7;
+  }
+
+  button[data-id="5"] {
+    order: 8;
+  }
+
+  button[data-id="6"] {
+    order: 9;
+  }
+
+  button[data-id="-"] {
+    order: 10;
+  }
+
+  button[data-id="7"] {
+    order: 11;
+  }
+
+  button[data-id="8"] {
+    order: 12;
+  }
+
+  button[data-id="9"] {
+    order: 13;
+  }
+
+  button[data-id="+"] {
+    order: 14;
+  }
+
+  button[data-id="."] {
+    order: 15;
+  }
+
+  button[data-id="0"] {
+    order: 16;
+  }
+
+  button[data-id="="] {
+    order: 17;
+    flex-basis: 50%;
   }
 
 </style>
